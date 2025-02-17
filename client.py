@@ -32,7 +32,6 @@ def receive_message():
             client.close()
             break
 
-
 thread_send = threading.Thread(target=send_message)
 thread_receive = threading.Thread(target=receive_message)
 
