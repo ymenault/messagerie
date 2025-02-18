@@ -8,7 +8,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((IP, PORT))
 server.listen(10)
 
-# Matrice stockant les clients sous forme [client_socket, pseudo]
+# Matrice stockant les clients sous forme [client_socket, pseudo] tg
 clients_data = []
 
 def broadcast(message):
