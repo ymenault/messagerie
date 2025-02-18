@@ -1,4 +1,3 @@
-
 def encrypt(message, key):
     key = int(key)
     encrypted_message = ""

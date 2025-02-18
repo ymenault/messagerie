@@ -1,4 +1,5 @@
 import socket
+import sys
 import threading
 
 IP = "127.0.0.1"
@@ -35,7 +36,7 @@ def handle_client(client, pseudo, key):
             message = client.recv(1024).decode("utf-8")
             broadcast(key)
             broadcast(pseudo)
-            print("envoi des informations...")
+            sys.stdout.flush()
             broadcast(message)
         except:
             remove_client(client)
