@@ -1,7 +1,7 @@
 import socket
 import threading
 
-from vig import encrypt, decrypt
+from cesar import encrypt, decrypt
 
 IP = "127.0.0.1"
 PORT = 55555
@@ -11,7 +11,8 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((IP, PORT))
 
 pseudo = input("Choose a pseudo : ")
-client.send(bytes(pseudo, "utf-8"))
+encrypted_pseudo = encrypt(pseudo)
+client.send(bytes(encrypted_pseudo, "utf-8"))
 
 def send_message():
     while True:
