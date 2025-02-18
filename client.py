@@ -2,7 +2,7 @@ import socket
 import threading
 import random
 
-from cesar import encrypt_cesar, decrypt_cesar, cle
+from cesar import encrypt_cesar, decrypt_cesar
 
 IP = "127.0.0.1"
 PORT = 55555

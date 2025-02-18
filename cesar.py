@@ -1,6 +1,6 @@
 import random
 
-cle = 10
+cle = random.randint(1, 50)
 
 def encrypt_cesar(message):
     encrypted_message = ""
