@@ -1,7 +1,7 @@
 import socket 
 import threading
 
-from cesar import encrypt_cesar, decrypt_cesar
+from vig import encrypt
 
 IP = "127.0.0.1"
 PORT = 55555
@@ -37,7 +37,7 @@ def handle_client(client, pseudo):
     while True:
         try:
             message = client.recv(1024).decode("utf-8")
-            broadcast(f"{encrypt_cesar(pseudo)} : {message}")
+            broadcast(f"{encrypt(pseudo)} : {message}")
 
         except:
             index = clients.index(client)
