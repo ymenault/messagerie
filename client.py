@@ -2,7 +2,7 @@ import socket
 import threading
 import random
 
-from cesar import encrypt_cesar, decrypt_cesar
+from cesar import decrypt_cesar
 
 IP = "127.0.0.1"
 PORT = 55555
@@ -18,7 +18,7 @@ client.send(bytes(pseudo, "utf-8"))
 def send_message():
     while True:
         message = input()
-        crypted_message = encrypt_cesar(message)
+        crypted_message = encrypt_vig(message)
         client.send(bytes(crypted_message, "utf-8"))
 
 def receive_message():
