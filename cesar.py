@@ -1,8 +1,6 @@
-import random
 
-key = 5
-
-def encrypt(message):
+def encrypt(message, key):
+    key = int(key)
     encrypted_message = ""
     for letter in message:
         if letter.isalpha():
@@ -20,7 +18,8 @@ def encrypt(message):
             encrypted_message += letter
     return encrypted_message
     
-def decrypt(message):
+def decrypt(message, key):
+    key = int(key)
     decrypted_message = ""
     for letter in message:
         if letter.isalpha():
@@ -37,4 +36,3 @@ def decrypt(message):
         else:
             decrypted_message += letter
     return decrypted_message
-

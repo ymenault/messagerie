@@ -1,4 +1,4 @@
-import socket 
+import socket
 import threading
 
 IP = "127.0.0.1"
@@ -21,18 +21,22 @@ def handle_connexion():
         print(f"Connection from {adress} has been established!")
 
         pseudo = client.recv(1024).decode("utf-8")
-        clients_data.append([client, pseudo])
+        key = client.recv(1024).decode("utf-8")
+        clients_data.append([client, pseudo, key])
 
         print(f"{pseudo} has joined the chat!")
 
-        thread_client = threading.Thread(target=handle_client, args=(client, pseudo))
+        thread_client = threading.Thread(target=handle_client, args=(client, pseudo, key))
         thread_client.start()
 
-def handle_client(client, pseudo):
+def handle_client(client, pseudo, key):
     while True:
         try:
             message = client.recv(1024).decode("utf-8")
-            broadcast(f"{pseudo} : {message}")
+            broadcast(key)
+            broadcast(pseudo)
+            print("envoi des informations...")
+            broadcast(message)
         except:
             remove_client(client)
             break
