@@ -1,4 +1,5 @@
 import base64
+import random
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
@@ -56,13 +57,6 @@ def decrypt(encrypted_msg, pwd):
 
     return decrypted_msg.decode()
 
-# Example usage
-if __name__ == "__main__":
-    password = "mysecretpassword"
-    message = "This is a secret message."
-
-    encrypted = encrypt(password, message)
-    print(f"Encrypted: {encrypted}")
-
-    decrypted = decrypt(password, encrypted)
-    print(f"Decrypted: {decrypted}")
+def generate_random_string(length):
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    return ''.join(random.choice(letters) for _ in range(length))
