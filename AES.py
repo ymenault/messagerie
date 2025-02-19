@@ -12,63 +12,57 @@ salt = os.urandom(16)
 def encrypt(msg, pwd):
 
 
-	if isinstance(msg, str):
-		msg = msg.encode()
+    if isinstance(msg, str):
+        msg = msg.encode()
 
-	# Derive key
-	kdf = PBKDF2HMAC(
-		algorithm=hashes.SHA256(),
-		length=32,
-		salt=salt,
-		iterations=100000,
-		backend=default_backend()
-	)
-	key = kdf.derive(pwd.encode())
+    # Derive key
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+        backend=default_backend()
+    )
+    key = kdf.derive(pwd.encode())
 
-	# Encrypt message
-	iv = os.urandom(16)
-	cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
-	encryptor = cipher.encryptor()
-	encrypted_msg = encryptor.update(msg) + encryptor.finalize()
+    # Encrypt message
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    encrypted_msg = encryptor.update(msg) + encryptor.finalize()
 
-	return base64.b64encode(iv + encrypted_msg)
+    return base64.b64encode(iv + encrypted_msg)
 
 def decrypt(encrypted_msg, pwd):
-	"""
-	Decrypts an encrypted message using a password.
-	
-	:param pwd: Password or passphrase (type: str)
-	:param encrypted_msg: Message to decrypt (type: bytes)
-	:return: Decrypted message (str)
-	"""
-	encrypted_msg = base64.b64decode(encrypted_msg)
-	iv = encrypted_msg[:16]
-	encrypted_msg = encrypted_msg[16:]
 
-	# Derive key
-	kdf = PBKDF2HMAC(
-		algorithm=hashes.SHA256(),
-		length=32,
-		salt=salt,
-		iterations=100000,
-		backend=default_backend()
-	)
-	key = kdf.derive(pwd.encode())
+    encrypted_msg = base64.b64decode(encrypted_msg)
+    iv = encrypted_msg[:16]
+    encrypted_msg = encrypted_msg[16:]
 
-	# Decrypt message
-	cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
-	decryptor = cipher.decryptor()
-	decrypted_msg = decryptor.update(encrypted_msg) + decryptor.finalize()
+    # Derive key
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+        backend=default_backend()
+    )
+    key = kdf.derive(pwd.encode())
 
-	return decrypted_msg.decode()
+    # Decrypt message
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted_msg = decryptor.update(encrypted_msg) + decryptor.finalize()
+
+    return decrypted_msg.decode()
 
 # Example usage
 if __name__ == "__main__":
-	password = "mysecretpassword"
-	message = "This is a secret message."
+    password = "mysecretpassword"
+    message = "This is a secret message."
 
-	encrypted = encrypt(password, message)
-	print(f"Encrypted: {encrypted}")
+    encrypted = encrypt(password, message)
+    print(f"Encrypted: {encrypted}")
 
-	decrypted = decrypt(password, encrypted)
-	print(f"Decrypted: {decrypted}")
+    decrypted = decrypt(password, encrypted)
+    print(f"Decrypted: {decrypted}")
