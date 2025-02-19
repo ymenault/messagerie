@@ -4,10 +4,10 @@ import random
 
 from handle_key import encrypt_key, decrypt_key
 from cesar import encrypt, decrypt
-#from vig import encrypt, decrypt, generate_random_string
+from vig import encrypt, decrypt, generate_random_string
 
-key = random.randint(1, 25) # Cesar key
-#key = generate_random_string(10) # Vigenere key
+#key = random.randint(1, 25) # Cesar key
+key = generate_random_string(10) # Vigenere key
 
 IP = "127.0.0.1"
 PORT = 55555
