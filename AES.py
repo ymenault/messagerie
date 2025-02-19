@@ -1,54 +1,74 @@
-from Crypto.Protocol.KDF import PBKDF2
-from cryptography.fernet import Fernet
-from Crypto import Random
 import base64
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import os
 
 
-salt = Random.new().read(8)
+
+salt = os.urandom(16)
+
+def encrypt(msg, pwd):
 
 
-def encrypt(pwd, msg):
-
-	"""
-	param pwd: password or passphrase (type: str)
-	param msg: message to encrypt (type: str or bytes) 
-	
-	return base64 encoded encrypted message
-	"""
-	
-	try:
+	if isinstance(msg, str):
 		msg = msg.encode()
-	
-	except:
-		pass
-	
-	key = PBKDF2(pwd, salt, 32)
-	
-	key = base64.urlsafe_b64encode(key)
-	
-	f = Fernet(key)
-	
-	e = f.encrypt(msg)
 
-	return base64.b64encode(e)
-	
-def decrypt(pwd, msg):
-	
+	# Derive key
+	kdf = PBKDF2HMAC(
+		algorithm=hashes.SHA256(),
+		length=32,
+		salt=salt,
+		iterations=100000,
+		backend=default_backend()
+	)
+	key = kdf.derive(pwd.encode())
+
+	# Encrypt message
+	iv = os.urandom(16)
+	cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+	encryptor = cipher.encryptor()
+	encrypted_msg = encryptor.update(msg) + encryptor.finalize()
+
+	return base64.b64encode(iv + encrypted_msg)
+
+def decrypt(encrypted_msg, pwd):
 	"""
-	param pwd: password or passphrase (type: str)
-	param msg: message to uncrypt (type: bytes) 
+	Decrypts an encrypted message using a password.
 	
-	return uncrypted decoded message (str)
+	:param pwd: Password or passphrase (type: str)
+	:param encrypted_msg: Message to decrypt (type: bytes)
+	:return: Decrypted message (str)
 	"""
-	
-	msg = base64.b64decode(msg)
-	
-	key = PBKDF2(pwd, salt, 32)
-	
-	key = base64.urlsafe_b64encode(key)
-	
-	f = Fernet(key)
-	
-	d = f.decrypt(msg)
-	
-	return d.decode()
+	encrypted_msg = base64.b64decode(encrypted_msg)
+	iv = encrypted_msg[:16]
+	encrypted_msg = encrypted_msg[16:]
+
+	# Derive key
+	kdf = PBKDF2HMAC(
+		algorithm=hashes.SHA256(),
+		length=32,
+		salt=salt,
+		iterations=100000,
+		backend=default_backend()
+	)
+	key = kdf.derive(pwd.encode())
+
+	# Decrypt message
+	cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+	decryptor = cipher.decryptor()
+	decrypted_msg = decryptor.update(encrypted_msg) + decryptor.finalize()
+
+	return decrypted_msg.decode()
+
+# Example usage
+if __name__ == "__main__":
+	password = "mysecretpassword"
+	message = "This is a secret message."
+
+	encrypted = encrypt(password, message)
+	print(f"Encrypted: {encrypted}")
+
+	decrypted = decrypt(password, encrypted)
+	print(f"Decrypted: {decrypted}")
