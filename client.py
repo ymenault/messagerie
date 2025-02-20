@@ -1,7 +1,7 @@
 import random
 import socket
 import threading
-import base64
+
 # from chiffrement.cesar import encrypt, decrypt
 from chiffrement.vig import encrypt, decrypt, generate_random_string
 from chiffrement.handle_key import encrypt_key, decrypt_key
