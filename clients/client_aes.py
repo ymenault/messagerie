@@ -1,7 +1,10 @@
 import socket
 import threading
+import sys
+import os
 
-from chiffrement.AES import encrypt, decrypt, get_key
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from chiffrement.RSA import encrypt, decrypt
 
 IP = "127.0.0.1"
 PORT = 55555

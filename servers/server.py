@@ -1,7 +1,6 @@
 import socket
 import threading
-from chiffrement.AES import encrypt, decrypt
-
+import time
 
 IP = "127.0.0.1"
 PORT = 55555
@@ -13,9 +12,8 @@ server.listen(10)
 clients_data = []
 
 def broadcast(message):
-    message = encrypt(message)
     for client in clients_data:
-        client[0].send(bytes(message.encode("utf-8")))
+        client[0].send(bytes(message, "utf-8"))
 
 
 def handle_connexion():
@@ -23,18 +21,23 @@ def handle_connexion():
         client, address = server.accept()
         print(f"New connexion from {address}")
 
-        pseudo = decrypt(client.recv(2048).decode("utf-8"))
-        clients_data.append([client, pseudo])
+        pseudo = client.recv(2048).decode("utf-8")
+        key = client.recv(2048).decode("utf-8")
+        clients_data.append([client, pseudo, key])
 
-        thread_client = threading.Thread(target=handle_client, args=(client, pseudo))
+        thread_client = threading.Thread(target=handle_client, args=(client, pseudo, key))
         thread_client.start()
 
-def handle_client(client, pseudo):
+def handle_client(client, pseudo, key):
     while True:
         try:
-            message = decrypt(client.recv(2048).decode("utf-8"))
+            message = client.recv(2048).decode("utf-8")
+            broadcast(key)
+            time.sleep(0.1)
             broadcast(pseudo)
+            time.sleep(0.1)
             broadcast(message)
+            time.sleep(0.1)
 
         except:
             remove_client(client)

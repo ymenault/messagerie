@@ -8,3 +8,6 @@ venv/
 env/
 *.venv/
 pip-selfcheck.json
+
+# Ignore les fichiers de clés RSA
+*.pem
