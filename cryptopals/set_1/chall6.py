@@ -66,6 +66,6 @@ def decrypt_file(file_path):
     decrypted_text = decrypt_repeating_key_xor(ciphertext)
     return decrypted_text
 
-file_path = "data_chall6_cryptopals.txt"
+file_path = "data6.txt"
 decrypted_message = decrypt_file(file_path)
 print(decrypted_message)

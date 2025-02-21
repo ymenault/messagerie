@@ -23,5 +23,5 @@ def detect_ecb_in_file(file_path):
                 print(line)
                 break
 
-file_path = "data_chall8_cryptopals.txt"
+file_path = "data8.txt"
 detect_ecb_in_file(file_path)

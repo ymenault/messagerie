@@ -20,6 +20,6 @@ def decrypt_file(file_path):
     decrypted_message = decrypt_aes_ecb(encoded_data)
     return decrypted_message
 
-file_path = "data_chall7_cryptopals.txt"
+file_path = "data7.txt"
 decrypted_message = decrypt_file(file_path)
 print(decrypted_message)

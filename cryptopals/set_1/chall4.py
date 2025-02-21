@@ -31,7 +31,7 @@ def single_byte_xor_crack(ciphertext):
 best_overall_score = float('-inf')
 best_overall_result = (None, None, None)
 
-with open("data_chall4_cryptopals.txt", "r") as file:
+with open("data4.txt", "r") as file:
     for line in file:
         hex_data = line.strip()
         if hex_data:
