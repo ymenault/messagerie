@@ -27,5 +27,9 @@ hex_input = '49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f697
 try:
     base64_output = hex_to_base64(hex_input)
     print("Base64 :", base64_output)
+    rep = 'SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t'
+    if rep == base64_output:
+        print("Test passed")
+
 except ValueError:
     print("Erreur : Chaîne hexadécimale invalide.")

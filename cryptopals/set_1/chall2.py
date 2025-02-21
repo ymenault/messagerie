@@ -12,3 +12,7 @@ hex1 = "1c0111001f010100061a024b53535009181c"
 hex2 = "686974207468652062756c6c277320657965"
 result = hex_xor(hex1, hex2)
 print("XOR Result :", result)
+
+rep = '746865206b696420646f6e277420706c6179'
+if result == rep:
+    print("Chall 2 passed")
