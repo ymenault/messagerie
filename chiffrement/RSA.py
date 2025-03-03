@@ -11,9 +11,6 @@ def generate_keys():
             priv_file.write(key.export_key())
         with open("public.pem", "wb") as pub_file:
             pub_file.write(key.publickey().export_key())
-        print("Clés RSA générées.")
-    else:
-        print("Clés RSA déjà existantes.")
 
 def load_keys():
     private_key = RSA.import_key(open("private.pem").read())
@@ -45,13 +42,13 @@ generate_keys()
 priv, pub = load_keys()
 
 
-# Chiffrement et déchiffrement
-msg = "salut"
-encrypted_msg = encrypt(msg, pub)
-decrypted_msg = decrypt(encrypted_msg, priv)
-print("Message déchiffré:", decrypted_msg)
+# # Chiffrement et déchiffrement
+# msg = "salut"
+# encrypted_msg = encrypt(msg, pub)
+# decrypted_msg = decrypt(encrypted_msg, priv)
+# print("Message déchiffré:", decrypted_msg)
 
-# Signature et vérification
-msg_to_sign = "mon message a signer"
-signature = sign(msg_to_sign, priv)
-print(verify(msg_to_sign, signature, pub))
+# # Signature et vérification
+# msg_to_sign = "mon message a signer"
+# signature = sign(msg_to_sign, priv)
+# print(verify(msg_to_sign, signature, pub))
