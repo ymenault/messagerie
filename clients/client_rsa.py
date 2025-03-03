@@ -9,19 +9,22 @@ from chiffrement.RSA import encrypt, decrypt, load_keys
 IP = "127.0.0.1"
 PORT = 55555
 
-# Charger la clé publique du serveur pour chiffrer les messages
-_, server_pub = load_keys()
+client_priv, client_pub = load_keys()
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((IP, PORT))
 
-pseudo = input("Choose a pseudo : ")
-client.send(encrypt(pseudo, server_pub))  # Envoi du pseudo chiffré
+# Envoyer la clé publique au serveur
+client.send(client_pub.export_key())
+
+pseudo = input("Choose a pseudo: ")
+client.send(encrypt(pseudo, client_pub))
 
 def send_message():
     while True:
         message = input()
-        client.send(encrypt(message, server_pub))  # Envoi du message chiffré
+        encrypted_msg = encrypt(message, client_pub)
+        client.send(encrypted_msg)
 
 def receive_message():
     while True:
@@ -29,8 +32,7 @@ def receive_message():
             encrypted_data = client.recv(4096)
             if not encrypted_data:
                 break
-
-            message = decrypt(encrypted_data, private_key)
+            message = decrypt(encrypted_data, client_priv)
             print(message)
         except:
             print("Connexion perdue.")

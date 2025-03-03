@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from chiffrement.RSA import encrypt, decrypt, load_keys
+from chiffrement.RSA import load_keys
 
 IP = "127.0.0.1"
 PORT = 55555
@@ -17,33 +17,26 @@ server.listen(10)
 
 clients = []
 
-def broadcast(message, sender_client):
-    encrypted_message = encrypt(message, server_pub)
+def broadcast(message):
     for client in clients:
-        if client != sender_client:
-            client.send(encrypted_message)
+        client.send(message)
 
 def handle_client(client):
     try:
         encrypted_pseudo = client.recv(4096)
-        pseudo = decrypt(encrypted_pseudo, server_priv)
         clients.append(client)
-        print(f"{pseudo} has joined the chat.")
-
+        broadcast(encrypted_pseudo, client)
+        
         while True:
             encrypted_message = client.recv(4096)
             if not encrypted_message:
                 break
-
-            message = decrypt(encrypted_message, server_priv)
-            print(f"{pseudo}: {message}")
-            broadcast(f"{pseudo}: {message}", client)
-    
-    except:
-        print(f"Client {pseudo} déconnecté.")
-    
+            broadcast(encrypted_message, client)
+    except Exception as e:
+        print(f"Erreur avec le client: {e}")
     finally:
-        clients.remove(client)
+        if client in clients:
+            clients.remove(client)
         client.close()
 
 def accept_clients():

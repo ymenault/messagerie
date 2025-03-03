@@ -2,13 +2,18 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
+import os
 
 def generate_keys():
-    key = RSA.generate(2048)
-    with open("private.pem", "wb") as priv_file:
-        priv_file.write(key.export_key())
-    with open("public.pem", "wb") as pub_file:
-        pub_file.write(key.publickey().export_key())
+    if not os.path.exists("private.pem") or not os.path.exists("public.pem"):
+        key = RSA.generate(2048)
+        with open("private.pem", "wb") as priv_file:
+            priv_file.write(key.export_key())
+        with open("public.pem", "wb") as pub_file:
+            pub_file.write(key.publickey().export_key())
+        print("Clés RSA générées.")
+    else:
+        print("Clés RSA déjà existantes.")
 
 def load_keys():
     private_key = RSA.import_key(open("private.pem").read())
@@ -38,6 +43,7 @@ def verify(message, signature, public_key):
 # Générer et charger les clés
 generate_keys()
 priv, pub = load_keys()
+
 
 # Chiffrement et déchiffrement
 msg = "salut"

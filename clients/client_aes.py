@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from chiffrement.RSA import encrypt, decrypt
+from chiffrement.AES import encrypt, decrypt
 
 IP = "127.0.0.1"
 PORT = 55555
