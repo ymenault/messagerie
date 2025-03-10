@@ -1,3 +1,14 @@
-
-.venv/
+# Ignore Python cache files
 __pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+venv/
+env/
+.env
+*.venv/
+pip-selfcheck.json
+
+# Ignore les fichiers de clés RSA
+*.pem
