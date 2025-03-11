@@ -42,10 +42,10 @@ class LoginWindow:
         tk.Button(button_frame, text="Inscription", command=self.register).pack(side=tk.LEFT)
         
         self.db_config = {
-            'host': 'localhost',
-            'user': 'root',
-            'password': 'rootpassword',
-            'database': 'wishzapp_db'
+            'host': '127.0.0.1',
+            'user': 'admin',
+            'password': 'admin',
+            'database': 'wishzapp'
         }
 
     def hash_password(self, password):

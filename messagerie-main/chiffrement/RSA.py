@@ -56,25 +56,24 @@ def verify(message, signature, public_key):
     except (ValueError, TypeError):
         return "La signature est invalide"
 
-# Ne pas exécuter le code de test lors de l'import
-if __name__ == "__main__":
-    # Test du chiffrement/déchiffrement
-    generate_keys()
-    priv, pub = load_keys()
+
+# # Test du chiffrement/déchiffrement
+# generate_keys()
+# priv, pub = load_keys()
     
-    # Test avec un message court
-    msg = "salut"
-    encrypted_msg = encrypt(msg, pub)
-    decrypted_msg = decrypt(encrypted_msg, priv)
-    print("Message court déchiffré:", decrypted_msg)
+# # Test avec un message court
+# msg = "salut"
+# encrypted_msg = encrypt(msg, pub)
+# decrypted_msg = decrypt(encrypted_msg, priv)
+# print("Message court déchiffré:", decrypted_msg)
     
-    # Test avec un message long
-    long_msg = "Ceci est un très long message pour tester le chiffrement RSA par morceaux. " * 10
-    encrypted_long = encrypt(long_msg, pub)
-    decrypted_long = decrypt(encrypted_long, priv)
-    print("Message long déchiffré:", decrypted_long)
+# # Test avec un message long
+# long_msg = "Ceci est un très long message pour tester le chiffrement RSA par morceaux. " * 10
+# encrypted_long = encrypt(long_msg, pub)
+# decrypted_long = decrypt(encrypted_long, priv)
+# print("Message long déchiffré:", decrypted_long)
     
-    # Test de la signature et vérification
-    msg_to_sign = "mon message a signer"
-    signature = sign(msg_to_sign, priv)
-    print(verify(msg_to_sign, signature, pub))
+# # Test de la signature et vérification
+# msg_to_sign = "mon message a signer"
+# signature = sign(msg_to_sign, priv)
+# print(verify(msg_to_sign, signature, pub))
