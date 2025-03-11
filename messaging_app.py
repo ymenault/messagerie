@@ -1,19 +1,125 @@
 import subprocess
 import os
 import tkinter as tk
+from tkinter import messagebox
 import threading
 import socket
 import random
 import sys
+import mysql.connector
 from pathlib import Path
+import hashlib
 
 # Ajouter le chemin pour les modules de chiffrement
 sys.path.append(str(Path(__file__).parent / "messagerie-main"))
 from chiffrement.AES import encrypt as aes_encrypt, decrypt as aes_decrypt
 from chiffrement.RSA import encrypt as rsa_encrypt, decrypt as rsa_decrypt, load_keys
 
+class LoginWindow:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Connexion")
+        self.root.geometry("300x200")
+        
+        # Frame principale
+        main_frame = tk.Frame(self.root, padx=20, pady=20)
+        main_frame.pack(expand=True)
+        
+        # Champs de connexion
+        tk.Label(main_frame, text="Nom d'utilisateur:").pack()
+        self.username_entry = tk.Entry(main_frame)
+        self.username_entry.pack(pady=5)
+        
+        tk.Label(main_frame, text="Mot de passe:").pack()
+        self.password_entry = tk.Entry(main_frame, show="*")
+        self.password_entry.pack(pady=5)
+        
+        # Boutons
+        button_frame = tk.Frame(main_frame)
+        button_frame.pack(pady=20)
+        
+        tk.Button(button_frame, text="Connexion", command=self.login).pack(side=tk.LEFT, padx=10)
+        tk.Button(button_frame, text="Inscription", command=self.register).pack(side=tk.LEFT)
+        
+        self.db_config = {
+            'host': 'localhost',
+            'user': 'root',
+            'password': 'rootpassword',
+            'database': 'wishzapp_db'
+        }
+
+    def hash_password(self, password):
+        """Hash le mot de passe avec SHA-256."""
+        return hashlib.sha256(password.encode()).hexdigest()
+
+    def connect_db(self):
+        """Établit une connexion à la base de données."""
+        try:
+            return mysql.connector.connect(**self.db_config)
+        except mysql.connector.Error as err:
+            messagebox.showerror("Erreur", f"Erreur de connexion à la base de données: {err}")
+            return None
+
+    def login(self):
+        """Vérifie les identifiants et lance l'application."""
+        username = self.username_entry.get()
+        password = self.hash_password(self.password_entry.get())
+        
+        conn = self.connect_db()
+        if not conn:
+            return
+        
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", 
+                         (username, password))
+            user = cursor.fetchone()
+            
+            if user:
+                self.root.destroy()
+                app = MessagingApp(tk.Tk(), username)
+                app.master.mainloop()
+            else:
+                messagebox.showerror("Erreur", "Nom d'utilisateur ou mot de passe incorrect")
+        except mysql.connector.Error as err:
+            messagebox.showerror("Erreur", f"Erreur de base de données: {err}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    def register(self):
+        """Inscrit un nouvel utilisateur."""
+        username = self.username_entry.get()
+        password = self.hash_password(self.password_entry.get())
+        
+        if not username or not self.password_entry.get():
+            messagebox.showerror("Erreur", "Veuillez remplir tous les champs")
+            return
+            
+        conn = self.connect_db()
+        if not conn:
+            return
+            
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", 
+                         (username, password))
+            conn.commit()
+            messagebox.showinfo("Succès", "Inscription réussie ! Vous pouvez maintenant vous connecter.")
+        except mysql.connector.Error as err:
+            if err.errno == 1062:  # Code d'erreur pour duplicate entry
+                messagebox.showerror("Erreur", "Ce nom d'utilisateur existe déjà")
+            else:
+                messagebox.showerror("Erreur", f"Erreur lors de l'inscription: {err}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    def run(self):
+        self.root.mainloop()
+
 class MessagingApp:
-    def __init__(self, master):
+    def __init__(self, master, username):
         self.master = master
         master.title("Messaging App")
         
@@ -35,9 +141,13 @@ class MessagingApp:
         tk.Label(self.pseudo_frame, text="Pseudo:").pack(side=tk.LEFT)
         self.pseudo_entry = tk.Entry(self.pseudo_frame)
         self.pseudo_entry.pack(side=tk.LEFT, padx=5)
-        self.pseudo = f"User_{random.randint(1000, 9999)}"
+        self.pseudo = username
         self.pseudo_entry.insert(0, self.pseudo)
         self.pseudo_entry.config(state=tk.DISABLED)
+        
+        # Bouton de reconnexion
+        self.reconnect_button = tk.Button(self.pseudo_frame, text="Reconnecter", command=self.connect_to_server)
+        self.reconnect_button.pack(side=tk.LEFT, padx=5)
         
         # Zone de chat
         self.text_area = tk.Text(master, height=20, width=50)
@@ -75,6 +185,13 @@ class MessagingApp:
 
     def connect_to_server(self):
         try:
+            if self.connected:
+                try:
+                    self.socket.close()
+                except:
+                    pass  # Ignorer les erreurs lors de la fermeture
+                
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(('localhost', 55555))
             self.connected = True
             
@@ -91,6 +208,11 @@ class MessagingApp:
             self.add_message("Système", "Connecté au serveur!")
             return True
         except Exception as e:
+            self.connected = False
+            try:
+                self.socket.close()
+            except:
+                pass  # Ignorer les erreurs lors de la fermeture
             self.add_message("Système", f"Erreur de connexion: {str(e)}")
             return False
 
@@ -121,14 +243,19 @@ class MessagingApp:
                 self.add_message("Vous", message)
                 self.entry.delete(0, tk.END)
             except Exception as e:
-                self.add_message("Système", f"Erreur d'envoi: {str(e)}")
                 self.connected = False
+                try:
+                    self.socket.close()
+                except:
+                    pass  # Ignorer les erreurs lors de la fermeture
+                self.add_message("Système", f"Erreur d'envoi: {str(e)}")
 
     def receive_messages(self):
-        while True:
+        while self.connected:
             try:
                 data = self.socket.recv(4096 if self.server_type == 'server_rsa' else 1024)
                 if not data:
+                    self.connected = False
                     break
                     
                 # Décrypter le message si nécessaire
@@ -138,16 +265,28 @@ class MessagingApp:
                     message = data.decode()
 
                 if message:
-                    # Ne pas afficher les messages provenant de nous-mêmes
-                    if not message.startswith(f"{self.pseudo}:"):
+                    # Traiter les messages système (commençant par "Système:")
+                    if message.startswith("Système:"):
                         sender, contenu = message.split(":", 1)
                         self.master.after(0, lambda s=sender.strip(), m=contenu.strip(): self.add_message(s, m))
+                    # Ne pas afficher les messages provenant de nous-mêmes
+                    elif not message.startswith(f"{self.pseudo}:"):
+                        if ":" in message:
+                            sender, contenu = message.split(":", 1)
+                            self.master.after(0, lambda s=sender.strip(), m=contenu.strip(): self.add_message(s, m))
+                        else:
+                            # Si c'est juste un pseudo sans message, l'afficher comme un message système
+                            self.master.after(0, lambda m=message.strip(): self.add_message("Système", m))
             except Exception as e:
-                print(f"Erreur de réception: {str(e)}")
-                self.connected = False
+                if self.connected:
+                    print(f"Erreur de réception: {str(e)}")
+                    self.connected = False
+                    try:
+                        self.socket.close()
+                    except:
+                        pass
                 break
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = MessagingApp(root)
-    root.mainloop()
+    login_window = LoginWindow()
+    login_window.run()

@@ -5,39 +5,56 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-# from chiffrement.cesar import encrypt, decrypt
-from chiffrement.vig import encrypt, decrypt, generate_random_string
-from chiffrement.handle_key import encrypt_key, decrypt_key
+from chiffrement.cesar import encrypt, decrypt
 
 IP = "127.0.0.1"
 PORT = 55555
 
-# key = random.randint(1, 25)
-key = generate_random_string(16)
-encrypted_key = encrypt_key(key)
+key = random.randint(1, 25)
+print(f"Clé de chiffrement: {key}")
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((IP, PORT))
 
 pseudo = input("Choose a pseudo : ")
-client.send(bytes(encrypt(pseudo, key), "utf-8"))
-client.send(encrypted_key.encode("utf-8"))
+
+# Test du chiffrement
+print("Test de chiffrement:")
+test_message = "Hello"
+encrypted_test = encrypt(test_message, key)
+print(f"Message original: {test_message}")
+print(f"Message chiffré: {encrypted_test}")
+print(f"Message déchiffré: {decrypt(encrypted_test, key)}")
+
+# Envoyer le pseudo chiffré
+encrypted_pseudo = encrypt(pseudo, key)
+print(f"Pseudo chiffré envoyé: {encrypted_pseudo}")
+client.send(encrypted_pseudo.encode())
 
 def send_message():
     while True:
-        message = input()
-        client.send(bytes(encrypt(message, key), "utf-8"))
+        try:
+            message = input()
+            if message:
+                # Chiffrer et afficher pour vérification
+                encrypted_message = encrypt(message, key)
+                print(f"Message envoyé (chiffré): {encrypted_message}")
+                client.send(encrypted_message.encode())
+        except Exception as e:
+            print(f"Erreur d'envoi: {e}")
+            break
 
 def receive_message():
     while True:
         try:
-            key = decrypt_key(client.recv(2048).decode("utf-8"))
-            pseudo = decrypt(client.recv(2048).decode("utf-8"), key)
-            message = decrypt(client.recv(2048).decode("utf-8"), key)
-            print(f"{pseudo} : {message}")
-        except:
-            print("An error occurred!")
-            client.close()
+            encrypted_message = client.recv(2048).decode()
+            if encrypted_message:
+                # Déchiffrer et afficher
+                decrypted_message = decrypt(encrypted_message, key)
+                print(f"Message reçu (chiffré): {encrypted_message}")
+                print(f"Message déchiffré: {decrypted_message}")
+        except Exception as e:
+            print(f"Erreur de réception: {e}")
             break
 
 thread_send = threading.Thread(target=send_message)

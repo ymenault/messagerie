@@ -1,37 +1,19 @@
 def encrypt(message, key):
     key = int(key)
     encrypted_message = ""
-    for letter in message:
-        if letter.isalpha():
-            ascii_code = ord(letter)
-            if ascii_code >= 65 and ascii_code <= 90:
-                ascii_code += key
-                if ascii_code > 90:
-                    ascii_code -= 26
-            elif ascii_code >= 97 and ascii_code <= 122:
-                ascii_code += key
-                if ascii_code > 122:
-                    ascii_code -= 26
-            encrypted_message += chr(ascii_code)
-        else:
-            encrypted_message += letter
+    for char in message:
+        ascii_code = ord(char)
+        if ascii_code >= 32 and ascii_code <= 126:  # Caractères imprimables ASCII
+            ascii_code = ((ascii_code - 32 + key) % 95) + 32
+        encrypted_message += chr(ascii_code)
     return encrypted_message
     
 def decrypt(message, key):
     key = int(key)
     decrypted_message = ""
-    for letter in message:
-        if letter.isalpha():
-            ascii_code = ord(letter)
-            if ascii_code >= 65 and ascii_code <= 90:
-                ascii_code -= key
-                if ascii_code < 65:
-                    ascii_code += 26
-            elif ascii_code >= 97 and ascii_code <= 122:
-                ascii_code -= key
-                if ascii_code < 97:
-                    ascii_code += 26
-            decrypted_message += chr(ascii_code)
-        else:
-            decrypted_message += letter
+    for char in message:
+        ascii_code = ord(char)
+        if ascii_code >= 32 and ascii_code <= 126:  # Caractères imprimables ASCII
+            ascii_code = ((ascii_code - 32 - key) % 95) + 32
+        decrypted_message += chr(ascii_code)
     return decrypted_message

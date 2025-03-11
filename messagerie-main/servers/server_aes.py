@@ -37,9 +37,8 @@ def handle_client(client, pseudo):
     while True:
         try:
             message = decrypt(client.recv(2048).decode("utf-8"))
-            broadcast(pseudo)
-            broadcast(message)
-
+            formatted_message = f"{pseudo}: {message}"
+            broadcast(formatted_message)
         except:
             remove_client(client)
             break
